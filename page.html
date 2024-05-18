@@ -1,0 +1,101 @@
+<html><head>
+        <style type="text/css">
+
+        .myDiv {
+  border: 2px outset black;
+  background-color: lightblue;
+  text-align: center;
+  align: center;
+}
+</style>
+<style>
+.button {
+  background-color: #020E15;
+  border: none;
+  color: white;
+  padding: 10px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 10px 2px;
+  cursor: pointer;
+}
+</style>
+           <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+           <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+           <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+      </head>
+      <body>
+        <div align="left" style="margin-right:5%; padding-left:2%">
+          <div class="panel panel-default">
+            <div class="panel-heading" align="left"><img src="logo.jpg" width="80" height="60">&nbsp;&nbsp;&nbsp;<b>Indian Institute of Information Technology Kottayam,
+            An Institution of National Importance, Ministry of Education, GoI</b></div>
+            <div class="panel-body"><b>Instructions</b></div>
+            <div class="panel-body">1. Select Semester<br>
+            <div class="panel-body">2. Submit<br></div>
+          </div>
+          </div>
+        </div>
+           <br><br>
+           <div class="container" style="width:1000px;">
+<select name="sem" id="sem">
+  <option value="SEM">SELECT SEMESTER</option>
+  <option value="1">1</option>
+    <option value="2">2</option>
+      <option value="3">3</option>
+        <option value="4">4</option>
+          <option value="5">5</option>
+            <option value="6">6</option>
+              <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+            </select>
+
+
+            <!-- <div class="panel-body" >-->
+
+</div>
+<br>
+<br>
+ <div class="container" style="width:1000px;">
+<input type="button" name="sem1" id="sem1" value="Submit" class="button">
+</div>
+<div id="result" class="container" style="width:1000px;">
+</div>
+                                            
+                     
+
+                
+           
+
+      
+ 
+
+ 
+
+
+
+ <script>
+ $(document).ready(function(){
+
+       $('#sem1').on('click', function () {
+           var sem =  $('#sem').val();
+           alert(sem);
+           $.ajax({
+                url:"result-pub.php",
+                method:"POST",
+                data:{sem:sem},
+                //dataType:"json",
+                //
+                success:function(data){
+                //  alert("hi");
+                // alert(data);
+                   $("#result").html(data);
+
+                }
+           });
+      });
+ });
+ </script>
+</body></html>
