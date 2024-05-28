@@ -3,8 +3,12 @@ import requests
 import csv
 from bs4 import BeautifulSoup
 from getpass import getpass
+import threading
+from concurrent.futures import ThreadPoolExecutor,as_completed
+import time
 
-
+fetch_failed = []
+skipped = []
 # dob = "2004-01-28"
 # rollno = "2022BCY0026"
 login_url = "https://erp.iiitkottayam.ac.in/php/functions.php"
@@ -26,7 +30,7 @@ def login(rollno,dob):
     }
     session = requests.Session()
     # Attempt to login
-    print("Attempting to log in...")
+    print("Attempting to log into ",rollno)
     login_response = session.post(login_url, data=payload)
     # login_response = session.post(login_url, data=payload)
     # print(login_response)
@@ -41,12 +45,15 @@ def login(rollno,dob):
         exit()
 
 
-def init(folder_name):
+def init(folder_name) -> bool:
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)
+        return False
+    else:
+        return True
 
 
-def get_result(rollno,semester,session):
+def get_result(rollno,semester,session,year):
 
     # Access the result page
     print("Accessing the result page...")
@@ -56,6 +63,7 @@ def get_result(rollno,semester,session):
     if result_page_response.status_code == 200:
         print("Accessed result page successfully.")
     else:
+        fetch_failed.append(rollno)
         print(f"Failed to access result page. Status code: {result_page_response.status_code}")
         exit()
 
@@ -89,7 +97,7 @@ def get_result(rollno,semester,session):
 
     # Parse HTML content
     soup = BeautifulSoup(result_response.text, 'html.parser').prettify()
-    folder_name = "D:\VScodeFiles\python\Projects\Result Piracy\data\\" + "2022" +"\\" + rollno
+    folder_name = "D:\VScodeFiles\python\Projects\Result Piracy\data\\" + year +"\\" + rollno
     # Save HTML content
     filename = f"{rollno}_{semester}.html"
     file_path = os.path.join(folder_name, filename)
@@ -105,7 +113,7 @@ def get_result(rollno,semester,session):
 
 
 
-def get_id_card(rollno,session):
+def get_id_card(rollno,session,year):
 
     # Access the result page
     # print("Accessing the result page...")
@@ -144,7 +152,7 @@ def get_id_card(rollno,session):
 
     # Parse HTML content
     # soup = BeautifulSoup(result_response.text, 'html.parser')
-    folder_name = "D:\VScodeFiles\python\Projects\Result Piracy\data\\" + "2022" +"\\" + rollno
+    folder_name = "D:\VScodeFiles\python\Projects\Result Piracy\data\\" + year +"\\" + rollno
     # Save HTML content
     filename = f"{rollno}" + "_id.pdf"
     file_path = os.path.join(folder_name, filename)
@@ -156,7 +164,16 @@ def get_id_card(rollno,session):
     # print("Preview of retrieved results:")
     # print(soup.prettify()[:])  # Print the first 500 characters for a preview
 
-
+def controller(rollno,sem,dob,folder_name,year):
+    sess = login(rollno,dob)
+    skip = init(folder_name)
+    if not skip :
+        get_id_card(rollno,sess,year)
+        for i in range(1,int(sem)+1):
+            get_result(rollno,i,sess,year)
+    else:
+        skipped.append(rollno)
+        print(f"skipping {rollno}")
 
 
 # sess = login("2022BCY0044","2003-01-17")
@@ -171,15 +188,40 @@ dic = {
 }
 
 
-with open("ccc.csv",mode='r') as file:
+threads = []
+with open("2023.csv",mode='r') as file:
     csv_reader = csv.reader(file)
-    for row in csv_reader:
-        rollno = row[3]
-        dob = row[7]
-        year = rollno[0:4]
-        folder_name = "D:\VScodeFiles\python\Projects\Result Piracy\data\\" + "2022" +"\\" + rollno
-        sess = login(rollno,dob)
-        init(folder_name)
-        get_id_card(rollno,sess)
-        for i in range(1,dic[rollno[year]]+1):
-            get_result(rollno,i,sess)
+    with ThreadPoolExecutor(max_workers=5) as exec:
+        futures = [exec.submit(controller , row[3] , dic[row[3][0:4]] , row[5] , str("D:\VScodeFiles\python\Projects\Result Piracy\data\\" + row[3][0:4] +"\\" + row[3]) ,row[3][0:4]) for row in csv_reader]
+    
+        for future in as_completed(futures):
+            try:
+                future.result()
+            except Exception as e:
+                print(f"Task generated an exception: {e}")
+    
+    
+    
+    
+    
+    
+    # for row in csv_reader:
+    #     rollno = row[3]
+    #     dob = row[5]
+    #     year = rollno[0:4]
+    #     folder_name = "D:\VScodeFiles\python\Projects\Result Piracy\data\\" + row[0:4] +"\\" + row[3]
+
+        
+
+
+    #     thread = threading.Thread(target=controller, args=(rollno,dic[year],dob,folder_name,year))
+    #     threads.append(thread)
+    #     thread.start()
+    
+    # for thread in threads:
+    #     thread.join()
+
+
+
+print("............................................................................\nFetch failed: ",fetch_failed)
+print("\nSkipped: ",skipped)
