@@ -166,11 +166,10 @@ def get_id_card(rollno,session,year):
 
 def controller(rollno,sem,dob,folder_name,year):
     sess = login(rollno,dob)
-    skip = init(folder_name)
-    if not skip :
+    if True :
         get_id_card(rollno,sess,year)
-        for i in range(1,int(sem)+1):
-            get_result(rollno,i,sess,year)
+        # for i in range(1,int(sem)+1):
+        #     get_result(rollno,i,sess,year)
     else:
         skipped.append(rollno)
         print(f"skipping {rollno}")
@@ -189,9 +188,9 @@ dic = {
 
 
 threads = []
-with open("2023.csv",mode='r') as file:
+with open("src/2022-3.csv",mode='r') as file:
     csv_reader = csv.reader(file)
-    with ThreadPoolExecutor(max_workers=5) as exec:
+    with ThreadPoolExecutor(max_workers=10) as exec:
         futures = [exec.submit(controller , row[3] , dic[row[3][0:4]] , row[5] , str("D:\VScodeFiles\python\Projects\Result Piracy\data\\" + row[3][0:4] +"\\" + row[3]) ,row[3][0:4]) for row in csv_reader]
     
         for future in as_completed(futures):

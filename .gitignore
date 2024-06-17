@@ -1,3 +1,6 @@
 /data
 /backup
 *.zip
+/src
+/src/*
+*.html
