@@ -1,8 +1,8 @@
 import pymongo
 
 client = pymongo.MongoClient("mongodb://localhost:27017/")
-db = client["idcard"]
-collection = db["id"]
+db = client["result"]
+collection = db["student"]
 
 unique_keys = set()  # Track unique values of yourKeyField
 duplicates = []

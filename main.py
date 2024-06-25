@@ -9,17 +9,9 @@ import time
 
 fetch_failed = []
 skipped = []
-# dob = "2004-01-28"
-# rollno = "2022BCY0026"
 login_url = "https://erp.iiitkottayam.ac.in/php/functions.php"
 result_url = "https://erp.iiitkottayam.ac.in/php/sem_result.php"
 id_card_url = "https://erp.iiitkottayam.ac.in/php/id-card.php"
-
-# semester = "4"
-
-
-
-
 
 def login(rollno,dob):
      # Login payload
@@ -44,14 +36,12 @@ def login(rollno,dob):
         print("Login failed. Please check your credentials.")
         exit()
 
-
 def init(folder_name) -> bool:
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)
         return False
     else:
         return True
-
 
 def get_result(rollno,semester,session,year):
 
@@ -109,10 +99,6 @@ def get_result(rollno,semester,session,year):
     # print("Preview of retrieved results:")
     # print(soup.prettify()[:])  # Print the first 500 characters for a preview
 
-
-
-
-
 def get_id_card(rollno,session,year):
 
     # Access the result page
@@ -166,18 +152,10 @@ def get_id_card(rollno,session,year):
 
 def controller(rollno,sem,dob,folder_name,year):
     sess = login(rollno,dob)
-    if True :
-        get_id_card(rollno,sess,year)
-        # for i in range(1,int(sem)+1):
-        #     get_result(rollno,i,sess,year)
-    else:
-        skipped.append(rollno)
-        print(f"skipping {rollno}")
-
-
-# sess = login("2022BCY0044","2003-01-17")
-# init("D:\VScodeFiles\python\Projects\Result Piracy\data")
-# get_id_card("2022BCY0044",sess)
+    init(folder_name)
+    get_id_card(rollno,sess,year)
+    for i in range(1,int(sem)+1):
+        get_result(rollno,i,sess,year)
 
 dic = {
     "2022": 4,
@@ -188,10 +166,10 @@ dic = {
 
 
 threads = []
-with open("src/2022-3.csv",mode='r') as file:
+with open("src/2021.csv",mode='r') as file:
     csv_reader = csv.reader(file)
     with ThreadPoolExecutor(max_workers=10) as exec:
-        futures = [exec.submit(controller , row[3] , dic[row[3][0:4]] , row[5] , str("D:\VScodeFiles\python\Projects\Result Piracy\data\\" + row[3][0:4] +"\\" + row[3]) ,row[3][0:4]) for row in csv_reader]
+        futures = [exec.submit(controller , row[3] , dic[row[3][0:4]] , row[7] , str("D:\VScodeFiles\python\Projects\Result Piracy\data\\" + row[3][0:4] +"\\" + row[3]) ,row[3][0:4]) for row in csv_reader]
     
         for future in as_completed(futures):
             try:

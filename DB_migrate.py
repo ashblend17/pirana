@@ -34,7 +34,6 @@ student_record = {
     ],
 }
 
-
 student = {
     "student_id": "student_id",     #rollno
     "name": "Name",
@@ -45,7 +44,6 @@ student = {
     "current_semester": 1
 }
 
-
 course = {
     "course_id": "course_id",       #rollno_coursecode
     "student_id": "student_id",
@@ -54,26 +52,20 @@ course = {
     "grade": "Grade"
 }
 
-
 semester = {
     "semester_id": "semester_id",   #rollno_semester
     "student_id": "student_id",     #rollno
-    "semester": 1,
     "sgpa": 0.0
 }
 
-
-
-###################################################################################################################
-# Connect to MongoDB server
-client = MongoClient('mongodb://localhost:27017')  # adjust as needed
-
-# Select database and collection
-db = client['idcard']
-collection = db['id']
-error_files = []
-
+#extract and store grades
 def extract_student_grades(folderpath):
+    client = MongoClient('mongodb://localhost:27017')  # adjust as needed
+
+    # Select database and collection
+    db = client['result']
+    collection = db['course']
+    error_files = []
     os.walk(folderpath)
     for root, dirs, files in os.walk(folderpath):
 
@@ -111,9 +103,18 @@ def extract_student_grades(folderpath):
                     print(f"Error for {file}")
                     error_files.append(file)
                     continue
+    with open("./failed_files.txt", "w") as file:
+        file.write("\n".join(error_files))
     print(error_files)
 
+#extract and store id card info from data
 def store_id(folderpath):
+    client = MongoClient('mongodb://localhost:27017')  # adjust as needed
+
+    # Select database and collection
+    db = client['idcard']
+    collection = db['id']
+    error_files = []
     os.walk(folderpath)
     for root, dirs, files in os.walk(folderpath):
         for file in files:
@@ -134,8 +135,14 @@ def store_id(folderpath):
                     print(f"Error with {file}")
                     continue
             
-
+#extract and store student record
 def create_personal_record(folderpath):
+    client = MongoClient('mongodb://localhost:27017')  # adjust as needed
+
+    # Select database and collection
+    db = client['result']
+    collection = db['student']
+    error_files = []
     os.walk(folderpath)
     for root, dirs, files in os.walk(folderpath):
         # print(files)
@@ -153,7 +160,7 @@ def create_personal_record(folderpath):
                         tables = soup.find_all('table')
                         name = tables[1].find_all('tr')[1].find_all('th')[0].find_all('td')[0].text.strip()[5:].strip()
                         branch = rollno[4:7]
-                        current_semester = str((2026-int(rollno[0:4])))
+                        current_semester = str((2024-int(rollno[0:4]))*2)
                         flag = False
                         student = {
                             "student_id": rollno,
@@ -166,40 +173,46 @@ def create_personal_record(folderpath):
                     print("Error")
                     continue
 
+def create_semester_record(folderpath):
+    client = MongoClient('mongodb://localhost:27017')
+    db = client['result']
+    collection = db['semester']
+    error_files = []
+    os.walk(folderpath)
+    for root, dirs, files in os.walk(folderpath):
+        # print(files)
+
+        # flag = True
+        for file in files:
+            if file.endswith(".html") :
+                try:
+                    rollno = file[-18:-7]
+                    folder_new = folderpath + rollno
+                    file_path = os.path.join(folder_new, file)
+                    semester_info = {}
+                    with open(file_path, mode='r') as file:
+                        # print(file_path)
+                        soup = BeautifulSoup(file,'html.parser')
+                        tables = soup.find_all('table')
+                        semester = tables[0].find_all('tr')[1].get_text().strip().split()[1]
+                        # flag = False
+                        sgpa = tables[2].find_all('tr')[-1].text.strip().split()[-1]
+                        semester_info = {
+                            "semester_id": rollno + "_" + semester,
+                            "student_id": rollno,
+                            "sgpa": sgpa
+                        }
+                    collection.insert_one(semester_info)
+                    print(semester_info)
+                except:
+                    print("Error")
+                    continue
 
 
 
-def create_semester_record(student,semester,grades):
-    semester = {
-        "_id": "semester_id",
-        "student_id": student["_id"],
-        "semester": semester,
-        "sgpa": 0.0
-    }
-    return semester
+f = "D:\VScodeFiles\python\Projects\Result Piracy\data\\2021\\"
+extract_student_grades(f)
 
-def create_grades_record(semester,grades):
-    courses = []
-    for grade in grades:
-        course = {
-            "_id": "course_id",
-            "semester_id": semester["_id"],
-            "code": grade["code"],
-            "name": grade["name"],
-            "grade": grade["grade"]
-        }
-        courses.append(course)
-    return courses
-
-
-
-
-
-
-
-
-f = "D:\VScodeFiles\python\Projects\Result Piracy\data\\2022\\"
-store_id(f)
 
 
 
