@@ -4,3 +4,5 @@
 /src
 /src/*
 *.html
+/backend/.env
+/backend/node_modules

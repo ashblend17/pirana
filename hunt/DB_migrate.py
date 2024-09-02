@@ -212,21 +212,3 @@ def create_semester_record(folderpath):
 
 f = "D:\VScodeFiles\python\Projects\Result Piracy\data\\2021\\"
 extract_student_grades(f)
-
-
-
-
-
-
-
-############################################################################################################################################################
-# Insert the student record
-# result = collection.insert_one(student_record)
-# print(f"Inserted record with ID: {result.inserted_id}")
-
-
-# def open_html():
-#     with open("D:\VScodeFiles\python\Projects\Result Piracy\data\\2022\\2022BCY0044\\2022BCY0044_1.html",mode='r') as file:
-#         soup = BeautifulSoup(file.read(), 'html.parser')
-#         print(soup.prettify())
-        
