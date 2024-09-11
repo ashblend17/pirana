@@ -8,14 +8,23 @@ const db = require('./db/init');
 const cook = require('./app');
 app.use(cors());
 app.use(express.json());
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 3000;
 const IP = process.env.IP || 'localhost';
 
 mongoose.connect(process.env.mongo_connect).then(() => console.log('connected to mnogodb database')).catch((e) => console.log('error connecting to database',e));
 
-app.get('/', (req, res) => {
-    res.send({'Hello World!' : 'Welcome to the Cook API'});
+app.get('/sem', (req, res) => {
+    res.send({'Hello World!' : 'Welcome to the Cook API - sem'});
 });
+
+app.get('/stu', (req, res) => {
+    res.send({'Hello World!' : 'Welcome to the Cook API - stu'});
+});
+
+app.get('/cou', (req, res) => {
+    res.send({'Hello World!' : 'Welcome to the Cook API - cou'});
+});
+
 
 app.get('/sem', async(req, res) => {
     const {student_id} = req.body;
