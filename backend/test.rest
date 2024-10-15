@@ -1,0 +1,7 @@
+GET / http/1.1
+Host: localhost:4000
+Content-Type: application/json
+
+{
+    "student_id": "2022BCY0044"
+}
